@@ -19,13 +19,12 @@ $stmtPayments = $pdo->prepare("
         u.username,
         p.cardholder_name as name,
         p.expiry_date,
-        CURRENT_TIMESTAMP as payment_date,
         DATEDIFF(b.check_out, b.check_in) AS number_of_days,
-        (DATEDIFF(b.check_out, b.check_in) * r.price) AS total_price
+        (DATEDIFF(b.check_out, b.check_in) * r.price) as total_price
     FROM payments p
-    INNER JOIN bookings b ON p.booking_id = b.id 
-    INNER JOIN rooms r ON b.room_id = r.id 
-    INNER JOIN users u ON b.user_id = u.id
+    JOIN bookings b ON p.booking_id = b.id
+    JOIN rooms r ON b.room_id = r.id
+    JOIN users u ON b.user_id = u.id
     ORDER BY p.id DESC
 ");
 
@@ -660,12 +659,6 @@ $stats = [
                                 </th>
                                 <th>
                                     <div class="th-content">
-                                        <i class="far fa-calendar-alt"></i>
-                                        <span>Payment Date</span>
-                                    </div>
-                                </th>
-                                <th>
-                                    <div class="th-content">
                                         <i class="fas fa-info-circle"></i>
                                         <span>Status</span>
                                     </div>
@@ -707,15 +700,6 @@ $stats = [
                                     <div class="amount">$<?= number_format($payment['total_price'], 2) ?></div>
                                 </td>
                                 <td>
-                                    <div class="date">
-                                        <i class="far fa-calendar-alt mr-1"></i>
-                                        <?= date('M d, Y', strtotime($payment['payment_date'])) ?>
-                                        <small class="text-muted d-block">
-                                            <?= date('h:i A', strtotime($payment['payment_date'])) ?>
-                                        </small>
-                                    </div>
-                                </td>
-                                <td>
                                     <?php 
                                     $statusClass = match($payment['status']) {
                                         'paid' => 'success',
@@ -735,13 +719,16 @@ $stats = [
                                 </td>
                                 <td>
                                     <div class="action-buttons">
-                                        <button class="btn btn-info btn-sm" title="View Details">
+                                        <a href="view_payment_details.php?id=<?= $payment['id'] ?>" 
+                                           class="btn btn-info btn-sm" title="View Details">
                                             <i class="fas fa-eye"></i>
-                                        </button>
-                                        <button class="btn btn-danger btn-sm" title="Delete"
-                                                onclick="return confirm('Are you sure you want to delete this payment?');">
+                                        </a>
+                                        <a href="delete_payment.php?id=<?= $payment['id'] ?>" 
+                                           class="btn btn-danger btn-sm" 
+                                           onclick="return confirm('Are you sure you want to delete this payment?')"
+                                           title="Delete Payment">
                                             <i class="fas fa-trash"></i>
-                                        </button>
+                                        </a>
                                     </div>
                                 </td>
                             </tr>
